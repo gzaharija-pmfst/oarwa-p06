@@ -5,6 +5,7 @@ const cors = require('cors')
 app.use(cors())
 app.use(express.json())
 app.use(express.static('build'))
+const Poruka = require('./models/poruka')
 
 
 const zahtjevInfo = (req, res, next) => {
@@ -13,10 +14,10 @@ const zahtjevInfo = (req, res, next) => {
     console.log('Tijelo:', req.body)
     console.log('---')
     next()
-  }
-  
-  app.use(zahtjevInfo)
-  
+}
+
+app.use(zahtjevInfo)
+
 
 
 let poruke = [
@@ -42,7 +43,10 @@ app.get('/', (req, res) => {
 })
 
 app.get('/api/poruke', (req, res) => {
-    res.json(poruke)
+    Poruka.find({}).then(rezultat => {
+        console.log(rezultat);
+        res.json(rezultat)
+    })
 })
 
 app.get('/api/poruke/:id', (req, res) => {
@@ -73,11 +77,11 @@ app.put('/api/poruke/:id', (req, res) => {
 
 app.post('/api/poruke', (req, res) => {
     const maxId = poruke.length > 0
-    ? Math.max(...poruke.map(p => p.id))
-    : 0
+        ? Math.max(...poruke.map(p => p.id))
+        : 0
 
     const podatak = req.body
-    if(!podatak.sadrzaj){
+    if (!podatak.sadrzaj) {
         return res.status(400).json({
             error: 'Nedostaje sadržaj poruke'
         })
@@ -89,15 +93,15 @@ app.post('/api/poruke', (req, res) => {
         id: maxId + 1
     }
 
-    poruke = poruke.concat(poruka) 
+    poruke = poruke.concat(poruka)
     res.json(poruka)
 })
 
 const nepoznataRuta = (req, res) => {
     res.status(404).send({ error: 'nepostojeca ruta' })
-  }
-  
-  app.use(nepoznataRuta)
+}
+
+app.use(nepoznataRuta)
 
 const PORT = 3001
 app.listen(PORT, () => {
