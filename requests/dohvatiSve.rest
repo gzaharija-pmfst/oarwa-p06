@@ -2,7 +2,7 @@ POST http://localhost:3001/api/poruke
 content-type: application/json
 
 {
-  "sadrzaj": "Imam sadrzaj",
+  "sadrzaj": "Ima",
   "vazno": true,
   "glupo": "ne"
 }

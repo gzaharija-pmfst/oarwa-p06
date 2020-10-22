@@ -49,7 +49,7 @@ app.get('/api/poruke', (req, res) => {
   })
 })
 
-app.get('/api/poruke/:id', (req, res) => {
+app.get('/api/poruke/:id', (req, res, next) => {
   Poruka.findById(req.params.id)
     .then(poruka => {
       if (poruka) {
@@ -59,10 +59,7 @@ app.get('/api/poruke/:id', (req, res) => {
       }
 
     })
-    .catch(err => {
-      console.log("Greška pri trazenju", err);
-      res.status(500).end()
-    })
+    .catch(err => next(err))
 })
 
 app.delete('/api/poruke/:id', (req, res) => {
@@ -90,20 +87,20 @@ app.put('/api/poruke/:id', (req, res) => {
 
 })
 
-app.post('/api/poruke', (req, res) => {
+app.post('/api/poruke', (req, res, next) => {
   const podatak = req.body
-  if (!podatak.sadrzaj) {
-    return res.status(400).json({ error: 'Nedostaje sadržaj poruke' })
-  }
+
   const poruka = new Poruka({
     sadrzaj: podatak.sadrzaj,
     vazno: podatak.vazno || false,
     datum: new Date()
   })
 
-  poruka.save().then(spremljenaPoruka => {
+  poruka.save()
+  .then(spremljenaPoruka => {
     res.json(spremljenaPoruka)
   })
+  .catch(err => next(err))
 })
 
 const nepoznataRuta = (req, res) => {
@@ -111,6 +108,19 @@ const nepoznataRuta = (req, res) => {
 }
 
 app.use(nepoznataRuta)
+
+const errorHandler = (err, req, res, next ) => {
+    console.log(err.message);
+
+    if (err.name === 'CastError') {
+        return res.status(400).send({error: 'krivi format ID-a'})
+    } else if (err.name === 'ValidationError'){
+        return res.status(400).send({error: err.message})
+    }
+    next(err)
+}
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {

@@ -16,9 +16,19 @@ mongoose.connect(url, {
 })
 
 const porukaSchema = new mongoose.Schema({
-  sadrzaj: String,
-  datum: Date,
-  vazno: Boolean
+  sadrzaj: {
+    type: String,
+    minlength: 5,
+    required: true
+  },
+  datum: {
+    type: Date,
+    required: true
+  },
+  vazno: {
+    type: Boolean,
+    default: false
+  }
 })
 
 porukaSchema.set('toJSON', {
